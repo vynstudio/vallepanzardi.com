@@ -417,235 +417,883 @@ reveals.forEach(el => observer.observe(el));
 
 <!-- ========== CHATBOT ========== -->
 <div id="vfi-chat" aria-label="Chat de consulta" role="complementary">
-  <!-- Bubble trigger -->
   <button id="chat-trigger" aria-label="Abrir chat / Open chat" aria-expanded="false" aria-controls="chat-window">
     <svg id="chat-icon-open" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <svg id="chat-icon-close" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="display:none"><path d="M18 6 6 18M6 6l12 12"/></svg>
     <span class="chat-badge" id="chat-badge">1</span>
   </button>
-
-  <!-- Chat window -->
   <div id="chat-window" role="dialog" aria-label="Consulta rápida" aria-modal="false" hidden>
     <div class="chat-header">
       <div class="chat-header-info">
-        <div class="chat-avatar" aria-hidden="true">VP</div>
+        <div class="chat-avatar" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
         <div>
           <strong>Valle &amp; Panzardi</strong>
-          <span class="chat-status" data-lang="es">Responde en minutos</span>
-          <span class="chat-status" data-lang="en">Replies in minutes</span>
+          <span id="chat-status-text">● En línea / Online</span>
         </div>
       </div>
       <button id="chat-close-btn" aria-label="Cerrar chat">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
     </div>
-
-    <div class="chat-messages" id="chat-messages" aria-live="polite" aria-relevant="additions">
-      <!-- Greeting injected by JS -->
-    </div>
-
-    <div class="chat-quick-replies" id="chat-quick-replies">
-      <button class="qr-btn" data-msg-es="¿Cómo funciona el proceso de Green Card?" data-msg-en="How does the Green Card process work?">Green Card</button>
-      <button class="qr-btn" data-msg-es="¿Qué documentos necesito para solicitar asilo?" data-msg-en="What documents do I need to apply for asylum?">Asilo / Asylum</button>
-      <button class="qr-btn" data-msg-es="¿Cómo puedo renovar mi DACA?" data-msg-en="How can I renew my DACA?">DACA</button>
-      <button class="qr-btn" data-msg-es="¿Qué hago si recibí una orden de deportación?" data-msg-en="What do I do if I received a deportation order?">Deportación</button>
-    </div>
-
+    <div class="chat-messages" id="chat-messages" aria-live="polite" aria-relevant="additions"></div>
+    <div class="chat-choices" id="chat-choices"></div>
     <form class="chat-input-row" id="chat-form" autocomplete="off">
       <input type="text" id="chat-input" placeholder="Escribe tu pregunta..." aria-label="Mensaje" maxlength="300">
       <button type="submit" aria-label="Enviar">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
       </button>
     </form>
-    <p class="chat-disclaimer" data-lang="es">Este chat es orientativo. Para asesoría legal, <a href="./contact.html">solicite una consulta</a>.</p>
-    <p class="chat-disclaimer" data-lang="en">This chat is informational. For legal advice, <a href="./contact.html">request a consultation</a>.</p>
+    <p class="chat-disclaimer">⚖️ <span data-lang="es">Orientación general, no asesoría legal. <a href="./contact.html">Consulta gratis →</a></span><span data-lang="en">General guidance, not legal advice. <a href="./contact.html">Free consult →</a></span></p>
   </div>
 </div>
 
 <style>
-/* ---- CHATBOT STYLES ---- */
-#vfi-chat { position: fixed; bottom: 24px; right: 24px; z-index: 9999; font-family: var(--font-sans, 'DM Sans', sans-serif); }
-
-#chat-trigger {
-  width: 56px; height: 56px; border-radius: 50%;
-  background: var(--color-primary, #1a3a5c); color: #fff;
-  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-  transition: transform .2s, box-shadow .2s; position: relative;
-}
-#chat-trigger:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(0,0,0,0.32); }
-.chat-badge {
-  position: absolute; top: -4px; right: -4px;
-  background: var(--color-gold, #c9a84c); color: #fff;
-  font-size: 11px; font-weight: 700;
-  width: 18px; height: 18px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  animation: pulse-badge 2s ease-in-out infinite;
-}
-@keyframes pulse-badge { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
-.chat-badge.hidden { display: none; }
-
-#chat-window {
-  position: absolute; bottom: 68px; right: 0;
-  width: 340px; background: var(--color-surface, #fff);
-  border-radius: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.18);
-  display: flex; flex-direction: column; overflow: hidden;
-  animation: chat-in .2s ease;
-}
-@keyframes chat-in { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-#chat-window[hidden] { display: none; }
-
-.chat-header {
-  background: var(--color-primary, #1a3a5c); color: #fff;
-  padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
-}
-.chat-header-info { display: flex; align-items: center; gap: 10px; }
-.chat-avatar {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: var(--color-gold, #c9a84c); color: #fff;
-  font-weight: 700; font-size: 13px;
-  display: flex; align-items: center; justify-content: center;
-}
-.chat-header-info strong { display: block; font-size: 0.9rem; }
-.chat-status { font-size: 0.75rem; opacity: 0.85; }
-#chat-close-btn { background: none; border: none; color: #fff; cursor: pointer; opacity: 0.8; padding: 4px; }
-#chat-close-btn:hover { opacity: 1; }
-
-.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; max-height: 260px; }
-.chat-msg { max-width: 82%; padding: 10px 13px; border-radius: 16px; font-size: 0.875rem; line-height: 1.45; animation: msg-in .18s ease; }
-@keyframes msg-in { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-.chat-msg.bot { background: var(--color-surface-alt, #f0f4f8); color: var(--color-text, #1a202c); border-bottom-left-radius: 4px; align-self: flex-start; }
-.chat-msg.user { background: var(--color-primary, #1a3a5c); color: #fff; border-bottom-right-radius: 4px; align-self: flex-end; }
-.chat-typing { display: flex; gap: 4px; align-items: center; padding: 10px 13px; background: var(--color-surface-alt, #f0f4f8); border-radius: 16px; border-bottom-left-radius: 4px; align-self: flex-start; }
-.chat-typing span { width: 6px; height: 6px; background: var(--color-primary, #1a3a5c); border-radius: 50%; animation: dot-bounce .9s infinite; opacity: 0.6; }
-.chat-typing span:nth-child(2){animation-delay:.15s} .chat-typing span:nth-child(3){animation-delay:.3s}
-@keyframes dot-bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
-
-.chat-quick-replies { padding: 0 12px 10px; display: flex; flex-wrap: wrap; gap: 6px; }
-.qr-btn { background: none; border: 1.5px solid var(--color-primary, #1a3a5c); color: var(--color-primary, #1a3a5c); border-radius: 20px; padding: 5px 11px; font-size: 0.78rem; cursor: pointer; transition: background .15s, color .15s; white-space: nowrap; }
-.qr-btn:hover { background: var(--color-primary, #1a3a5c); color: #fff; }
-
-.chat-input-row { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--color-border, #e2e8f0); }
-#chat-input { flex: 1; border: 1.5px solid var(--color-border, #e2e8f0); border-radius: 20px; padding: 8px 14px; font-size: 0.875rem; outline: none; background: var(--color-surface, #fff); color: var(--color-text, #1a202c); }
-#chat-input:focus { border-color: var(--color-primary, #1a3a5c); }
-.chat-input-row button[type="submit"] { width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary, #1a3a5c); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.chat-input-row button[type="submit"]:hover { background: var(--color-primary-dark, #142d4a); }
-
-.chat-disclaimer { font-size: 0.72rem; color: var(--color-text-muted, #718096); padding: 0 14px 10px; margin: 0; text-align: center; }
-.chat-disclaimer a { color: var(--color-primary, #1a3a5c); }
-
-@media(max-width:400px){ #chat-window{width:calc(100vw - 32px); right: 0;} }
+#vfi-chat{position:fixed;bottom:24px;right:24px;z-index:9999;font-family:var(--font-sans,'DM Sans',sans-serif)}
+#chat-trigger{width:58px;height:58px;border-radius:50%;background:var(--color-primary,#1a3a5c);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(0,0,0,0.28);transition:transform .2s,box-shadow .2s;position:relative}
+#chat-trigger:hover{transform:scale(1.07);box-shadow:0 6px 32px rgba(0,0,0,0.36)}
+.chat-badge{position:absolute;top:-3px;right:-3px;background:#e53e3e;color:#fff;font-size:11px;font-weight:700;width:19px;height:19px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff;animation:badge-pulse 2.5s ease-in-out infinite}
+@keyframes badge-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+.chat-badge.hidden{display:none}
+#chat-window{position:absolute;bottom:70px;right:0;width:350px;background:var(--color-surface,#fff);border-radius:18px;box-shadow:0 8px 48px rgba(0,0,0,0.2);display:flex;flex-direction:column;overflow:hidden;animation:chat-slide-in .22s cubic-bezier(0.16,1,0.3,1)}
+@keyframes chat-slide-in{from{opacity:0;transform:translateY(16px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+#chat-window[hidden]{display:none}
+.chat-header{background:linear-gradient(135deg,#1a3a5c 0%,#1e4a73 100%);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.chat-header-info{display:flex;align-items:center;gap:10px}
+.chat-avatar{width:38px;height:38px;border-radius:50%;background:rgba(201,168,76,0.25);border:2px solid rgba(201,168,76,0.6);color:#c9a84c;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-header-info strong{display:block;font-size:.9rem;letter-spacing:.01em}
+#chat-status-text{font-size:.72rem;opacity:.85;color:#86efac}
+#chat-close-btn{background:none;border:none;color:#fff;cursor:pointer;opacity:.7;padding:4px;border-radius:6px;display:flex}
+#chat-close-btn:hover{opacity:1;background:rgba(255,255,255,.1)}
+.chat-messages{flex:1;overflow-y:auto;padding:14px 14px 6px;display:flex;flex-direction:column;gap:8px;max-height:280px;scroll-behavior:smooth}
+.chat-messages::-webkit-scrollbar{width:4px}
+.chat-messages::-webkit-scrollbar-track{background:transparent}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--color-border,#e2e8f0);border-radius:4px}
+.chat-msg{max-width:86%;padding:9px 13px;border-radius:16px;font-size:.875rem;line-height:1.5;animation:msg-appear .18s ease}
+@keyframes msg-appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.chat-msg.bot{background:var(--color-surface-alt,#f0f4f8);color:var(--color-text,#1a202c);border-bottom-left-radius:4px;align-self:flex-start}
+.chat-msg.user{background:linear-gradient(135deg,#1a3a5c,#1e4a73);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+.chat-msg a{color:var(--color-gold,#c9a84c);font-weight:600;text-decoration:underline}
+.chat-msg.bot a{color:#1a3a5c}
+.chat-typing{display:flex;gap:5px;align-items:center;padding:10px 14px;background:var(--color-surface-alt,#f0f4f8);border-radius:16px;border-bottom-left-radius:4px;align-self:flex-start}
+.chat-typing span{width:7px;height:7px;background:#94a3b8;border-radius:50%;animation:dot-wave .9s infinite}
+.chat-typing span:nth-child(2){animation-delay:.15s}.chat-typing span:nth-child(3){animation-delay:.3s}
+@keyframes dot-wave{0%,80%,100%{transform:translateY(0);opacity:.5}40%{transform:translateY(-6px);opacity:1}}
+.chat-choices{padding:6px 12px 10px;display:flex;flex-direction:column;gap:6px}
+.chat-choices.row{flex-direction:row;flex-wrap:wrap}
+.choice-btn{background:none;border:1.5px solid var(--color-primary,#1a3a5c);color:var(--color-primary,#1a3a5c);border-radius:10px;padding:8px 12px;font-size:.82rem;cursor:pointer;text-align:left;line-height:1.35;transition:all .15s;font-family:inherit}
+.choice-btn:hover{background:var(--color-primary,#1a3a5c);color:#fff;transform:translateX(2px)}
+.choice-btn.pill{border-radius:20px;padding:6px 12px;font-size:.8rem}
+.choice-btn.cta{background:var(--color-gold,#c9a84c);border-color:var(--color-gold,#c9a84c);color:#fff;font-weight:600}
+.choice-btn.cta:hover{background:#b8952e;border-color:#b8952e;transform:none}
+.chat-input-row{display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--color-border,#e2e8f0)}
+#chat-input{flex:1;border:1.5px solid var(--color-border,#e2e8f0);border-radius:20px;padding:8px 14px;font-size:.875rem;outline:none;background:var(--color-surface,#fff);color:var(--color-text,#1a202c)}
+#chat-input:focus{border-color:var(--color-primary,#1a3a5c)}
+.chat-input-row button[type=submit]{width:36px;height:36px;border-radius:50%;background:var(--color-primary,#1a3a5c);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+.chat-input-row button[type=submit]:hover{background:#142d4a}
+.chat-disclaimer{font-size:.7rem;color:var(--color-text-muted,#718096);padding:0 13px 9px;margin:0;text-align:center}
+.chat-disclaimer a{color:var(--color-primary,#1a3a5c);font-weight:600}
+.chat-progress{display:flex;gap:3px;padding:8px 14px 0;justify-content:center}
+.chat-progress-dot{width:6px;height:6px;border-radius:50%;background:var(--color-border,#e2e8f0);transition:background .3s}
+.chat-progress-dot.active{background:var(--color-primary,#1a3a5c)}
+.chat-progress-dot.done{background:var(--color-gold,#c9a84c)}
+@media(max-width:420px){#chat-window{width:calc(100vw - 20px);right:0}}
 </style>
 
 <script>
 (function(){
-  const ANSWERS_ES = {
-    greencard: `La Green Card (Residencia Permanente) se puede obtener por petición familiar, empleo u otras categorías. El proceso varía según su situación. ¡Contáctenos para una evaluación gratuita!`,
-    asilo: `Para solicitar asilo, en general necesita: formulario I-589, documentación de persecución, pruebas de identidad y evidencia de su país. Es un proceso complejo — la abogada Valle le puede guiar paso a paso.`,
-    daca: `Para renovar DACA debe presentar el formulario I-821D, I-765 y el pago de tarifas antes de que expire su DACA actual. Le recomendamos iniciar el proceso con 6 meses de anticipación.`,
-    deportacion: `Si recibió una orden de remoción, debe actuar de inmediato. Tiene derecho a un abogado — llámenos ahora al (407) 890-1018. Podemos evaluar opciones de apelación o moción de reapertura.`,
-    default: `Gracias por su mensaje. Un miembro del equipo de Valle & Panzardi se comunicará con usted pronto. Para asistencia inmediata, llame al <strong>(407) 890-1018</strong> o <a href="./contact.html">solicite su consulta gratis</a>.`
-  };
-  const ANSWERS_EN = {
-    greencard: `A Green Card (Permanent Residency) can be obtained through family petitions, employment, or other categories. The process varies by situation. Contact us for a free evaluation!`,
-    asilo: `To apply for asylum you generally need: Form I-589, evidence of persecution, identity documents, and country conditions evidence. It's a complex process — Attorney Valle can guide you step by step.`,
-    daca: `To renew DACA, submit Forms I-821D, I-765, and required fees before your current DACA expires. We recommend starting at least 6 months before expiration.`,
-    deportacion: `If you received a removal order, you must act immediately. You have the right to an attorney — call us now at (407) 890-1018. We can evaluate appeal options or motions to reopen.`,
-    default: `Thank you for your message. A Valle & Panzardi team member will reach out shortly. For immediate help, call <strong>(407) 890-1018</strong> or <a href="./contact.html">request your free consultation</a>.`
-  };
+'use strict';
 
-  function getLang() { return document.body.classList.contains('lang-en') ? 'en' : 'es'; }
+// ─── CONVERSATION TREE ───────────────────────────────────────────────────────
+// Each node: { id, bot: {es, en}, choices: [{label:{es,en}, next}], input: bool }
+// Special next values: 'END_CONSULT', 'END_CALL', 'END_INFO'
 
-  const trigger = document.getElementById('chat-trigger');
-  const win = document.getElementById('chat-window');
-  const badge = document.getElementById('chat-badge');
-  const iconOpen = document.getElementById('chat-icon-open');
-  const iconClose = document.getElementById('chat-icon-close');
-  const msgs = document.getElementById('chat-messages');
-  const form = document.getElementById('chat-form');
-  const input = document.getElementById('chat-input');
+const TREE = {
 
-  let isOpen = false;
+  // Step 0 — Language (auto-detected, skip if already set)
+  start: {
+    bot: {
+      es: '👋 ¡Hola! Soy el asistente virtual de Valle & Panzardi. ¿En qué le puedo ayudar hoy?',
+      en: '👋 Hi! I\'m the virtual assistant for Valle & Panzardi. How can I help you today?'
+    },
+    choices: [
+      { label: { es: '🔍 Tengo una pregunta sobre mi caso', en: '🔍 I have a question about my case' }, next: 'situation' },
+      { label: { es: '📋 Quiero saber qué servicios ofrecen', en: '📋 I want to know what services you offer' }, next: 'services_menu' },
+      { label: { es: '📞 Quiero hablar con un abogado', en: '📞 I want to speak with an attorney' }, next: 'contact_options' },
+      { label: { es: '💬 Tengo otra pregunta', en: '💬 I have another question' }, next: 'freetext' },
+    ]
+  },
 
-  function openChat() {
-    isOpen = true;
-    win.removeAttribute('hidden');
-    trigger.setAttribute('aria-expanded', 'true');
-    iconOpen.style.display = 'none';
-    iconClose.style.display = '';
-    badge.classList.add('hidden');
-    if (!msgs.children.length) greet();
-    input.focus();
+  // Step 1 — What is your situation?
+  situation: {
+    bot: {
+      es: '¿Cuál describe mejor su situación actual?',
+      en: 'Which best describes your current situation?'
+    },
+    choices: [
+      { label: { es: '🚨 Recibí una orden de deportación', en: '🚨 I received a deportation/removal order' }, next: 'deportation_q1' },
+      { label: { es: '🌿 Quiero obtener una Green Card', en: '🌿 I want to get a Green Card' }, next: 'greencard_q1' },
+      { label: { es: '🙏 Necesito solicitar asilo', en: '🙏 I need to apply for asylum' }, next: 'asylum_q1' },
+      { label: { es: '📄 Tengo un caso de visa o DACA', en: '📄 I have a visa or DACA issue' }, next: 'visa_daca' },
+      { label: { es: '👨‍👩‍👧 Petición familiar', en: '👨‍👩‍👧 Family petition' }, next: 'family_q1' },
+      { label: { es: '🏛️ Proceso de naturalización', en: '🏛️ Naturalization / Citizenship' }, next: 'citizenship_q1' },
+    ]
+  },
+
+  // ── DEPORTATION BRANCH ──────────────────────────────────
+  deportation_q1: {
+    bot: {
+      es: 'Entiendo, esta es una situación urgente. ¿Recibió recientemente la orden o lleva tiempo con ella?',
+      en: 'I understand — this is urgent. Did you receive the order recently or has it been a while?'
+    },
+    choices: [
+      { label: { es: '⚡ Muy reciente (menos de 30 días)', en: '⚡ Very recent (less than 30 days)' }, next: 'deportation_urgent' },
+      { label: { es: '📅 Hace más tiempo', en: '📅 It\'s been longer' }, next: 'deportation_older' },
+      { label: { es: '😟 No estoy seguro/a', en: '😟 I\'m not sure' }, next: 'deportation_unsure' },
+    ]
+  },
+  deportation_urgent: {
+    bot: {
+      es: '⚠️ Actúe ahora — tiene <strong>30 días</strong> para apelar desde la fecha de la orden. Cada día cuenta.\n\nPuede:\n• Apelar ante la Junta de Apelaciones de Inmigración (BIA)\n• Solicitar una moción de reapertura\n• Explorar protección bajo Convención contra la Tortura\n\nLa abogada Valle puede evaluar su caso hoy mismo.',
+      en: '⚠️ Act now — you have <strong>30 days</strong> to appeal from the order date. Every day matters.\n\nOptions may include:\n• Appeal to the Board of Immigration Appeals (BIA)\n• Motion to reopen your case\n• Protection under the Convention Against Torture\n\nAttorney Valle can review your case today.'
+    },
+    choices: [
+      { label: { es: '📞 Llamar ahora: (407) 890-1018', en: '📞 Call now: (407) 890-1018' }, next: 'END_CALL', href: 'tel:+14078901018' },
+      { label: { es: '✉️ Solicitar consulta urgente', en: '✉️ Request urgent consultation' }, next: 'END_CONSULT' },
+    ]
+  },
+  deportation_older: {
+    bot: {
+      es: 'Aún hay opciones. Dependiendo de su historial y circunstancias, podría ser posible:\n\n• Moción para reabrir el caso\n• Cancelación de deportación (si cumple requisitos de residencia)\n• Perdón provisional (waiver)\n• Protección bajo asilo si califica\n\n¿Tiene familia inmediata que sea ciudadana o residente permanente?',
+      en: 'There may still be options. Depending on your history and circumstances:\n\n• Motion to reopen the case\n• Cancellation of removal (if you meet residency requirements)\n• Provisional waiver\n• Asylum protection if you qualify\n\nDo you have immediate family who are U.S. citizens or permanent residents?'
+    },
+    choices: [
+      { label: { es: '✅ Sí, tengo familia', en: '✅ Yes, I have family members' }, next: 'deportation_family' },
+      { label: { es: '❌ No', en: '❌ No' }, next: 'deportation_nofamily' },
+      { label: { es: '🤔 No estoy seguro/a', en: '🤔 I\'m not sure' }, next: 'contact_options' },
+    ]
+  },
+  deportation_unsure: {
+    bot: {
+      es: 'No se preocupe — es normal estar confundido/a con estos documentos. Lo más importante es que hable con un abogado lo antes posible para entender exactamente en qué etapa está su caso.',
+      en: 'Don\'t worry — it\'s normal to be confused by these documents. The most important thing is to speak with an attorney as soon as possible to understand exactly where your case stands.'
+    },
+    choices: [
+      { label: { es: '📞 Llamar a la oficina', en: '📞 Call the office' }, next: 'END_CALL', href: 'tel:+14078901018' },
+      { label: { es: '📋 Solicitar consulta', en: '📋 Request consultation' }, next: 'END_CONSULT' },
+    ]
+  },
+  deportation_family: {
+    bot: {
+      es: 'Eso es importante — tener familiares ciudadanos o residentes puede abrir opciones de cancelación de deportación o ajuste de estatus. La abogada Valle ha manejado muchos casos similares con éxito.',
+      en: 'That\'s significant — having citizen or resident family members may open options for cancellation of removal or adjustment of status. Attorney Valle has handled many similar cases successfully.'
+    },
+    choices: [
+      { label: { es: '✉️ Quiero una evaluación de mi caso', en: '✉️ I want a case evaluation' }, next: 'END_CONSULT' },
+      { label: { es: '📞 Prefiero llamar', en: '📞 I prefer to call' }, next: 'END_CALL', href: 'tel:+14078901018' },
+    ]
+  },
+  deportation_nofamily: {
+    bot: {
+      es: 'Aún así hay opciones — asilo, protección contra tortura, u otras defensas humanitarias. Cada caso es único. Le recomendamos una evaluación completa con la abogada Valle.',
+      en: 'There are still options — asylum, protection against torture, or other humanitarian defenses. Every case is unique. We recommend a full evaluation with Attorney Valle.'
+    },
+    choices: [
+      { label: { es: '✉️ Solicitar consulta gratuita', en: '✉️ Request free consultation' }, next: 'END_CONSULT' },
+    ]
+  },
+
+  // ── GREEN CARD BRANCH ────────────────────────────────────
+  greencard_q1: {
+    bot: {
+      es: '¿Por qué vía le interesa obtener la Green Card?',
+      en: 'Which pathway to a Green Card are you interested in?'
+    },
+    choices: [
+      { label: { es: '👨‍👩‍👧 Por familiar (cónyuge, padre, hijo)', en: '👨‍👩‍👧 Through family (spouse, parent, child)' }, next: 'greencard_family' },
+      { label: { es: '💼 Por empleo', en: '💼 Through employment' }, next: 'greencard_work' },
+      { label: { es: '🙏 Por asilo o refugio', en: '🙏 Through asylum or refugee status' }, next: 'greencard_asylum' },
+      { label: { es: '❓ No sé si califico', en: '❓ I don\'t know if I qualify' }, next: 'greencard_unsure' },
+    ]
+  },
+  greencard_family: {
+    bot: {
+      es: 'La petición familiar es uno de los caminos más comunes. El proceso tiene dos etapas principales:\n\n<strong>1. Petición I-130</strong> — su familiar ciudadano/residente presenta la petición\n<strong>2. Ajuste de Estatus (I-485)</strong> — si ya está en EE.UU., o proceso consular si está en el exterior\n\n¿Está actualmente dentro de los Estados Unidos?',
+      en: 'Family petitions are one of the most common pathways. The process has two main stages:\n\n<strong>1. I-130 Petition</strong> — your citizen/resident family member files the petition\n<strong>2. Adjustment of Status (I-485)</strong> — if you\'re in the U.S., or consular processing if abroad\n\nAre you currently inside the United States?'
+    },
+    choices: [
+      { label: { es: '✅ Sí, estoy en EE.UU.', en: '✅ Yes, I\'m in the U.S.' }, next: 'greencard_inUS' },
+      { label: { es: '🌎 No, estoy en el exterior', en: '🌎 No, I\'m abroad' }, next: 'greencard_abroad' },
+    ]
+  },
+  greencard_inUS: {
+    bot: {
+      es: 'Si está en EE.UU., es posible que pueda hacer un Ajuste de Estatus sin salir del país — esto es más conveniente y evita riesgos. Sin embargo, debe cumplir ciertos requisitos (entrada legal, no haber violado estatus, etc.).\n\nLa abogada Valle puede determinar si califica en una consulta de 30 minutos.',
+      en: 'If you\'re in the U.S., you may be able to Adjust Status without leaving the country — this is more convenient and avoids risks. However, you must meet certain requirements (lawful entry, no status violations, etc.).\n\nAttorney Valle can determine your eligibility in a 30-minute consultation.'
+    },
+    choices: [
+      { label: { es: '📋 Agendar consulta gratuita', en: '📋 Schedule free consultation' }, next: 'END_CONSULT' },
+      { label: { es: '📞 Llamar: (407) 890-1018', en: '📞 Call: (407) 890-1018' }, next: 'END_CALL', href: 'tel:+14078901018' },
+    ]
+  },
+  greencard_abroad: {
+    bot: {
+      es: 'El proceso consular se realiza a través del Consulado de EE.UU. en su país. Los tiempos varían según la categoría familiar y el país de origen.\n\nPara ciudadanos americanos que peticionen a cónyuge: puede ser relativamente rápido. Para residentes permanentes peticionando a familia: los tiempos de espera son más largos.',
+      en: 'Consular processing is done through the U.S. Consulate in your country. Wait times vary by family category and country of birth.\n\nFor U.S. citizens petitioning a spouse: can be relatively quick. For permanent residents petitioning family: waiting times are longer.'
+    },
+    choices: [
+      { label: { es: '✉️ Evaluar mi caso', en: '✉️ Evaluate my case' }, next: 'END_CONSULT' },
+    ]
+  },
+  greencard_work: {
+    bot: {
+      es: 'Las Green Cards por empleo requieren que un empleador le patrocine (categorías EB-1, EB-2, EB-3) o, en algunos casos, puede autopeticionarse (EB-1A para personas con habilidades extraordinarias).\n\n¿Ya tiene un empleador dispuesto a patrocinarle?',
+      en: 'Employment-based Green Cards require employer sponsorship (EB-1, EB-2, EB-3 categories) or, in some cases, self-petition (EB-1A for extraordinary ability individuals).\n\nDo you already have an employer willing to sponsor you?'
+    },
+    choices: [
+      { label: { es: '✅ Sí, tengo empleador', en: '✅ Yes, I have an employer' }, next: 'END_CONSULT' },
+      { label: { es: '❌ No, o no estoy seguro/a', en: '❌ No, or I\'m not sure' }, next: 'greencard_work_no' },
+    ]
+  },
+  greencard_work_no: {
+    bot: {
+      es: 'Sin empleador también hay opciones si tiene habilidades extraordinarias, es investigador/a destacado/a, o tiene un negocio propio. Podría calificar para autopeticionarse.\n\nLe recomendamos una evaluación para determinar su mejor ruta.',
+      en: 'Without an employer there are still options if you have extraordinary ability, are an outstanding researcher, or run your own business — you may qualify to self-petition.\n\nWe recommend an evaluation to determine your best route.'
+    },
+    choices: [
+      { label: { es: '📋 Solicitar evaluación', en: '📋 Request evaluation' }, next: 'END_CONSULT' },
+    ]
+  },
+  greencard_asylum: {
+    bot: {
+      es: 'Si ya tiene asilo o estatus de refugiado, puede solicitar la Green Card después de 1 año de haber recibido el asilo. Es un proceso relativamente directo pero requiere documentación cuidadosa.',
+      en: 'If you already have asylum or refugee status, you can apply for a Green Card after 1 year from when your asylum was granted. It\'s a relatively straightforward process but requires careful documentation.'
+    },
+    choices: [
+      { label: { es: '✅ Ya tengo asilo aprobado', en: '✅ I already have approved asylum' }, next: 'END_CONSULT' },
+      { label: { es: '🔄 Todavía estoy en proceso de asilo', en: '🔄 I\'m still in the asylum process' }, next: 'asylum_q1' },
+    ]
+  },
+  greencard_unsure: {
+    bot: {
+      es: 'Hay muchas vías para obtener una Green Card y determinar si califica requiere revisar su situación específica: su historial migratorio, vínculos familiares, situación laboral y más.\n\nUna consulta de 30 minutos con la abogada Valle puede darte claridad total.',
+      en: 'There are many pathways to a Green Card, and determining eligibility requires reviewing your specific situation: immigration history, family ties, employment status, and more.\n\nA 30-minute consultation with Attorney Valle can give you complete clarity.'
+    },
+    choices: [
+      { label: { es: '📋 Consulta gratuita', en: '📋 Free consultation' }, next: 'END_CONSULT' },
+      { label: { es: '📞 Llamar ahora', en: '📞 Call now' }, next: 'END_CALL', href: 'tel:+14078901018' },
+    ]
+  },
+
+  // ── ASYLUM BRANCH ────────────────────────────────────────
+  asylum_q1: {
+    bot: {
+      es: '¿En qué etapa del proceso de asilo se encuentra?',
+      en: 'Where are you in the asylum process?'
+    },
+    choices: [
+      { label: { es: '🆕 Acabo de llegar o nunca he aplicado', en: '🆕 Just arrived or never applied' }, next: 'asylum_new' },
+      { label: { es: '⏳ Ya apliqué, esperando decisión', en: '⏳ Applied, waiting for decision' }, next: 'asylum_pending' },
+      { label: { es: '❌ Me negaron el asilo', en: '❌ My asylum was denied' }, next: 'asylum_denied' },
+      { label: { es: '✅ Ya tengo asilo aprobado', en: '✅ Asylum already approved' }, next: 'greencard_asylum' },
+    ]
+  },
+  asylum_new: {
+    bot: {
+      es: 'Para solicitar asilo en EE.UU., generalmente tiene <strong>1 año desde su llegada</strong> para presentar la solicitud (Formulario I-589). Excepciones aplican en algunos casos.\n\n¿Entró a EE.UU. hace menos de 1 año?',
+      en: 'To apply for asylum in the U.S., you generally have <strong>1 year from your arrival</strong> to file (Form I-589). Some exceptions apply.\n\nDid you enter the U.S. less than 1 year ago?'
+    },
+    choices: [
+      { label: { es: '✅ Sí, menos de 1 año', en: '✅ Yes, less than 1 year' }, next: 'asylum_timely' },
+      { label: { es: '❗ Hace más de 1 año', en: '❗ More than 1 year ago' }, next: 'asylum_late' },
+      { label: { es: '🤔 No sé exactamente', en: '🤔 I\'m not sure exactly' }, next: 'asylum_unsure_date' },
+    ]
+  },
+  asylum_timely: {
+    bot: {
+      es: 'Está a tiempo. El proceso de asilo tiene dos vías:\n\n<strong>Afirmativa:</strong> Se aplica con USCIS (si no tiene proceso de deportación)\n<strong>Defensiva:</strong> Se presenta ante un Juez de Inmigración (si está en proceso de deportación)\n\nLa base de su caso debe mostrar persecución por raza, religión, nacionalidad, grupo social o opinión política.',
+      en: 'You\'re still within the deadline. The asylum process has two tracks:\n\n<strong>Affirmative:</strong> File with USCIS (if not in removal proceedings)\n<strong>Defensive:</strong> Before an Immigration Judge (if in removal proceedings)\n\nYour case must show persecution based on race, religion, nationality, social group, or political opinion.'
+    },
+    choices: [
+      { label: { es: '📋 Quiero iniciar el proceso', en: '📋 I want to start the process' }, next: 'END_CONSULT' },
+      { label: { es: '❓ Tengo más preguntas', en: '❓ I have more questions' }, next: 'asylum_docs' },
+    ]
+  },
+  asylum_late: {
+    bot: {
+      es: 'Aunque pasó el año, hay excepciones importantes:\n\n• Cambio en circunstancias en su país de origen\n• Cambio en su situación personal\n• Circunstancias extraordinarias\n\nNo se rinda sin hablar con un abogado — muchos casos que parecen imposibles tienen solución.',
+      en: 'Even though it\'s past one year, there are important exceptions:\n\n• Changed circumstances in your home country\n• Changed personal circumstances\n• Extraordinary circumstances\n\nDon\'t give up without speaking to an attorney — many cases that seem impossible have solutions.'
+    },
+    choices: [
+      { label: { es: '📋 Evaluar si aplica alguna excepción', en: '📋 Evaluate if an exception applies' }, next: 'END_CONSULT' },
+    ]
+  },
+  asylum_pending: {
+    bot: {
+      es: 'Mientras espera la decisión: puede trabajar legalmente si su caso lleva más de 180 días pendiente (solicite EAD). Mantenga cualquier cambio de dirección actualizado con USCIS.\n\n¿Tiene audiencia programada con un Juez de Inmigración?',
+      en: 'While you wait: you may be able to work legally if your case has been pending over 180 days (apply for EAD). Keep your address updated with USCIS.\n\nDo you have a hearing scheduled with an Immigration Judge?'
+    },
+    choices: [
+      { label: { es: '✅ Sí, tengo audiencia', en: '✅ Yes, I have a hearing' }, next: 'asylum_hearing' },
+      { label: { es: '❌ No tengo audiencia programada', en: '❌ No hearing scheduled' }, next: 'END_CONSULT' },
+    ]
+  },
+  asylum_hearing: {
+    bot: {
+      es: '🔴 Preparar una audiencia de asilo es complejo y las consecuencias de presentarse sin abogado pueden ser graves. Le recomendamos enfáticamente que tenga representación legal.\n\nLa abogada Valle tiene experiencia con audiencias en el Tribunal de Inmigración de Orlando.',
+      en: '🔴 Preparing for an asylum hearing is complex and the consequences of appearing without an attorney can be serious. We strongly recommend legal representation.\n\nAttorney Valle has experience with hearings at the Orlando Immigration Court.'
+    },
+    choices: [
+      { label: { es: '📞 Llamar urgente: (407) 890-1018', en: '📞 Urgent call: (407) 890-1018' }, next: 'END_CALL', href: 'tel:+14078901018' },
+      { label: { es: '✉️ Solicitar consulta', en: '✉️ Request consultation' }, next: 'END_CONSULT' },
+    ]
+  },
+  asylum_denied: {
+    bot: {
+      es: 'Una negación no es el final. Puede:\n\n• Apelar ante la Junta de Apelaciones de Inmigración (BIA) — generalmente 30 días\n• Apelación federal ante el Tribunal del 11° Circuito\n• Solicitar reapertura si hay nuevas pruebas\n\n¿Cuándo recibió la negación?',
+      en: 'A denial is not the end. Options include:\n\n• Appeal to the Board of Immigration Appeals (BIA) — typically 30 days\n• Federal appeal to the 11th Circuit Court\n• Motion to reopen with new evidence\n\nWhen did you receive the denial?'
+    },
+    choices: [
+      { label: { es: '⚡ Hace menos de 30 días', en: '⚡ Less than 30 days ago' }, next: 'asylum_appeal_urgent' },
+      { label: { es: '📅 Hace más de 30 días', en: '📅 More than 30 days ago' }, next: 'asylum_appeal_later' },
+    ]
+  },
+  asylum_appeal_urgent: {
+    bot: {
+      es: '⚠️ Actúe inmediatamente — el plazo de apelación ante la BIA puede estar por vencer. No pierda esta oportunidad crítica.',
+      en: '⚠️ Act immediately — your BIA appeal deadline may be approaching. Don\'t miss this critical window.'
+    },
+    choices: [
+      { label: { es: '📞 Llamar ahora: (407) 890-1018', en: '📞 Call now: (407) 890-1018' }, next: 'END_CALL', href: 'tel:+14078901018' },
+      { label: { es: '✉️ Consulta urgente', en: '✉️ Urgent consultation' }, next: 'END_CONSULT' },
+    ]
+  },
+  asylum_appeal_later: {
+    bot: {
+      es: 'Aunque pasó el plazo de la BIA, existen opciones en el tribunal federal o mociones especiales. Cada caso es diferente — una evaluación puede revelar opciones que usted no conoce.',
+      en: 'Even if the BIA deadline has passed, there may be federal court options or special motions. Every case is different — an evaluation may reveal options you\'re not aware of.'
+    },
+    choices: [
+      { label: { es: '📋 Solicitar evaluación', en: '📋 Request evaluation' }, next: 'END_CONSULT' },
+    ]
+  },
+  asylum_unsure_date: {
+    bot: {
+      es: 'No se preocupe — hablar con la abogada Valle es la forma más segura de determinar si está a tiempo y qué opciones tiene disponibles.',
+      en: 'Don\'t worry — speaking with Attorney Valle is the safest way to determine if you\'re within the deadline and what options are available to you.'
+    },
+    choices: [
+      { label: { es: '📋 Consulta gratuita', en: '📋 Free consultation' }, next: 'END_CONSULT' },
+    ]
+  },
+  asylum_docs: {
+    bot: {
+      es: 'Para un caso de asilo necesitará:\n\n• Formulario I-589 completado con precisión\n• Declaración personal detallando la persecución\n• Evidencia del país de origen (noticias, informes, documentos)\n• Pruebas de identidad y de su presencia en EE.UU.\n• Cualquier documento que respalde su temor de regresar\n\nLa preparación del caso es crucial — la abogada Valle le guiará en cada paso.',
+      en: 'For an asylum case you will need:\n\n• Completed Form I-589 with accuracy\n• Personal declaration detailing the persecution\n• Country conditions evidence (news, reports, documents)\n• Identity proof and evidence of U.S. presence\n• Any documents supporting your fear of return\n\nCase preparation is critical — Attorney Valle will guide you through each step.'
+    },
+    choices: [
+      { label: { es: '📋 Empezar mi caso', en: '📋 Start my case' }, next: 'END_CONSULT' },
+    ]
+  },
+
+  // ── VISA / DACA BRANCH ───────────────────────────────────
+  visa_daca: {
+    bot: {
+      es: '¿Qué tipo de asunto tiene?',
+      en: 'What type of issue do you have?'
+    },
+    choices: [
+      { label: { es: '🔄 Renovar DACA', en: '🔄 DACA renewal' }, next: 'daca_renewal' },
+      { label: { es: '🆕 Aplicar a DACA por primera vez', en: '🆕 First-time DACA application' }, next: 'daca_first' },
+      { label: { es: '✈️ Visa de trabajo o estudio (H-1B, F-1, etc.)', en: '✈️ Work or study visa (H-1B, F-1, etc.)' }, next: 'work_visa' },
+      { label: { es: '💍 Visa de prometido/a (K-1)', en: '💍 Fiancé visa (K-1)' }, next: 'k1_visa' },
+      { label: { es: '🌎 Otra visa', en: '🌎 Other visa type' }, next: 'END_CONSULT' },
+    ]
+  },
+  daca_renewal: {
+    bot: {
+      es: 'Para renovar DACA necesita:\n\n• Formulario I-821D (solicitud) + I-765 (permiso de trabajo)\n• Pago de $495 en tarifas gubernamentales\n• Foto reciente\n• Copia de su DACA actual\n\n⏰ <strong>Recomendamos iniciar 6 meses antes de que expire</strong> para evitar lapsos en su autorización de trabajo.\n\n¿Cuándo vence su DACA actual?',
+      en: 'To renew DACA you need:\n\n• Form I-821D (request) + I-765 (work permit)\n• $495 in government fees\n• Recent photo\n• Copy of your current DACA\n\n⏰ <strong>We recommend starting 6 months before expiration</strong> to avoid gaps in your work authorization.\n\nWhen does your current DACA expire?'
+    },
+    choices: [
+      { label: { es: '⚡ En menos de 6 meses', en: '⚡ In less than 6 months' }, next: 'daca_urgent' },
+      { label: { es: '📅 En más de 6 meses', en: '📅 More than 6 months away' }, next: 'daca_plan' },
+      { label: { es: '❗ Ya venció', en: '❗ Already expired' }, next: 'daca_expired' },
+    ]
+  },
+  daca_urgent: {
+    bot: {
+      es: '¡Actúe pronto! Con menos de 6 meses, debe iniciar la renovación de inmediato para evitar perder su permiso de trabajo y protección. Los tiempos de procesamiento de USCIS pueden ser de varios meses.',
+      en: 'Act soon! With less than 6 months, you should start your renewal immediately to avoid losing your work permit and protection. USCIS processing times can be several months.'
+    },
+    choices: [
+      { label: { es: '📋 Iniciar renovación ahora', en: '📋 Start renewal now' }, next: 'END_CONSULT' },
+      { label: { es: '📞 Llamar: (407) 890-1018', en: '📞 Call: (407) 890-1018' }, next: 'END_CALL', href: 'tel:+14078901018' },
+    ]
+  },
+  daca_plan: {
+    bot: {
+      es: 'Tiene tiempo, pero le recomendamos no esperar. Podemos ayudarle a preparar todos los documentos con anticipación para que la renovación sea sin estrés y sin errores.',
+      en: 'You have time, but we recommend not waiting. We can help you prepare all documents in advance so your renewal is stress-free and error-free.'
+    },
+    choices: [
+      { label: { es: '📋 Agendar cita', en: '📋 Schedule appointment' }, next: 'END_CONSULT' },
+    ]
+  },
+  daca_expired: {
+    bot: {
+      es: 'Si su DACA venció, puede que aún pueda renovarlo aunque haya pasado tiempo — USCIS acepta renovaciones tardías bajo ciertas circunstancias. Hable con nosotros lo antes posible.',
+      en: 'If your DACA expired, you may still be able to renew even if time has passed — USCIS accepts late renewals under certain circumstances. Please speak with us as soon as possible.'
+    },
+    choices: [
+      { label: { es: '📞 Llamar urgente', en: '📞 Urgent call' }, next: 'END_CALL', href: 'tel:+14078901018' },
+      { label: { es: '✉️ Consulta', en: '✉️ Consultation' }, next: 'END_CONSULT' },
+    ]
+  },
+  daca_first: {
+    bot: {
+      es: 'Para aplicar a DACA por primera vez debe cumplir todos estos requisitos:\n\n• Llegó a EE.UU. antes de los 16 años\n• Ha residido continuamente desde junio 15, 2007\n• Tenía menos de 31 años al 15 de junio, 2012\n• Está en escuela, se graduó, o es veterano\n• No tiene condenas penales graves\n\n¿Cumple con todos estos requisitos?',
+      en: 'For a first-time DACA application you must meet all these requirements:\n\n• Came to the U.S. before age 16\n• Continuously resided since June 15, 2007\n• Were under 31 years old on June 15, 2012\n• In school, graduated, or are a veteran\n• No serious criminal convictions\n\nDo you meet all these requirements?'
+    },
+    choices: [
+      { label: { es: '✅ Sí, creo que califico', en: '✅ Yes, I believe I qualify' }, next: 'END_CONSULT' },
+      { label: { es: '🤔 No estoy seguro/a', en: '🤔 I\'m not sure' }, next: 'END_CONSULT' },
+      { label: { es: '❌ No cumplo algún requisito', en: '❌ I don\'t meet one requirement' }, next: 'daca_no_qualify' },
+    ]
+  },
+  daca_no_qualify: {
+    bot: {
+      es: 'Aunque no califique para DACA, puede haber otras opciones según su situación: visa familiar, TPS, u otras protecciones. No se descarte sin hablar con un abogado.',
+      en: 'Even if you don\'t qualify for DACA, there may be other options based on your situation: family visa, TPS, or other protections. Don\'t rule yourself out without speaking to an attorney.'
+    },
+    choices: [
+      { label: { es: '📋 Explorar otras opciones', en: '📋 Explore other options' }, next: 'END_CONSULT' },
+    ]
+  },
+  work_visa: {
+    bot: {
+      es: 'Las visas de trabajo implican coordinación con el empleador y plazos estrictos. Los tipos más comunes:\n\n• <strong>H-1B:</strong> Profesional especializado (lotería anual en abril)\n• <strong>O-1:</strong> Habilidad extraordinaria\n• <strong>L-1:</strong> Transferencia intracompañía\n• <strong>TN:</strong> Profesionales de México/Canadá (USMCA)\n\n¿Tiene una situación específica o empleador en mente?',
+      en: 'Work visas involve coordination with your employer and strict deadlines. Most common types:\n\n• <strong>H-1B:</strong> Specialty occupation (annual lottery in April)\n• <strong>O-1:</strong> Extraordinary ability\n• <strong>L-1:</strong> Intracompany transfer\n• <strong>TN:</strong> Mexico/Canada professionals (USMCA)\n\nDo you have a specific situation or employer in mind?'
+    },
+    choices: [
+      { label: { es: '✅ Sí, tengo empleador', en: '✅ Yes, I have an employer' }, next: 'END_CONSULT' },
+      { label: { es: '📋 Quiero saber mis opciones', en: '📋 I want to know my options' }, next: 'END_CONSULT' },
+    ]
+  },
+  k1_visa: {
+    bot: {
+      es: 'La visa K-1 (prometido/a) permite a su pareja venir a EE.UU. para casarse. El proceso dura aproximadamente 6-12 meses:\n\n1. Ciudadano/a americana presenta I-129F\n2. Aprobación por USCIS (meses 2-6)\n3. Trámite consular en el país del prometido/a\n4. Entrada a EE.UU. y matrimonio en 90 días\n5. Ajuste de estatus a Green Card\n\n¿El prometido/a está actualmente fuera de EE.UU.?',
+      en: 'The K-1 (fiancé) visa allows your partner to come to the U.S. to marry. The process takes approximately 6-12 months:\n\n1. U.S. citizen files I-129F\n2. USCIS approval (months 2-6)\n3. Consular processing in fiancé\'s country\n4. Entry to U.S. and marriage within 90 days\n5. Adjustment of status to Green Card\n\nIs your fiancé currently outside the U.S.?'
+    },
+    choices: [
+      { label: { es: '✅ Sí, está en el exterior', en: '✅ Yes, they are abroad' }, next: 'END_CONSULT' },
+      { label: { es: '🤔 Tengo más preguntas', en: '🤔 I have more questions' }, next: 'END_CONSULT' },
+    ]
+  },
+
+  // ── FAMILY PETITION BRANCH ───────────────────────────────
+  family_q1: {
+    bot: {
+      es: '¿Cuál es su relación con la persona que desea peticionar (o quien lo peticiona a usted)?',
+      en: 'What is your relationship with the person you want to petition (or who is petitioning you)?'
+    },
+    choices: [
+      { label: { es: '💍 Cónyuge (esposo/a)', en: '💍 Spouse' }, next: 'family_spouse' },
+      { label: { es: '👶 Hijo/a (menor o adulto)', en: '👶 Child (minor or adult)' }, next: 'family_child' },
+      { label: { es: '👨‍👩‍👦 Padre o madre', en: '👨‍👩‍👦 Parent' }, next: 'family_parent' },
+      { label: { es: '👫 Hermano/a u otro familiar', en: '👫 Sibling or other relative' }, next: 'family_other' },
+    ]
+  },
+  family_spouse: {
+    bot: {
+      es: '¿El cónyuge que peticiona es ciudadano/a americano/a o residente permanente (Green Card)?',
+      en: 'Is the petitioning spouse a U.S. citizen or a Lawful Permanent Resident (Green Card holder)?'
+    },
+    choices: [
+      { label: { es: '🇺🇸 Ciudadano/a americano/a', en: '🇺🇸 U.S. citizen' }, next: 'family_spouse_citizen' },
+      { label: { es: '💚 Residente permanente', en: '💚 Lawful Permanent Resident' }, next: 'family_spouse_lpr' },
+    ]
+  },
+  family_spouse_citizen: {
+    bot: {
+      es: 'Excelente — cónyuge de ciudadano/a americana es categoría <strong>Inmediata</strong> (IR-1/CR-1), lo que significa que no hay lista de espera para la visa. El proceso puede completarse en 12-24 meses dependiendo de si están en EE.UU. o en el exterior.',
+      en: 'Great — spouse of a U.S. citizen is an <strong>Immediate Relative</strong> category (IR-1/CR-1), meaning there is no visa backlog. The process can be completed in 12-24 months depending on whether you\'re in the U.S. or abroad.'
+    },
+    choices: [
+      { label: { es: '📋 Iniciar el proceso', en: '📋 Start the process' }, next: 'END_CONSULT' },
+      { label: { es: '📞 Hablar con un abogado', en: '📞 Speak with an attorney' }, next: 'END_CALL', href: 'tel:+14078901018' },
+    ]
+  },
+  family_spouse_lpr: {
+    bot: {
+      es: 'Cónyuge de residente permanente cae en categoría F-2A. Actualmente hay tiempos de espera de visa. La fecha de prioridad determina cuándo puede avanzar su caso.\n\nLa abogada Valle puede revisar las fechas de visa actuales y estimar tiempos para su caso.',
+      en: 'Spouse of a permanent resident falls under category F-2A. There are currently visa waiting times. The priority date determines when your case can move forward.\n\nAttorney Valle can review current visa dates and estimate timelines for your case.'
+    },
+    choices: [
+      { label: { es: '📋 Consulta gratuita', en: '📋 Free consultation' }, next: 'END_CONSULT' },
+    ]
+  },
+  family_child: {
+    bot: {
+      es: 'Para peticiones de hijos, hay diferencias importantes según la edad y estado civil del hijo, y si el padre/madre es ciudadano o residente.\n\nHijos menores de 21 años solteros de ciudadanos americanos = categoría inmediata (sin espera).\nOtros casos tienen categorías con tiempos de espera.',
+      en: 'For child petitions, there are important differences based on the child\'s age, marital status, and whether the parent is a citizen or resident.\n\nUnmarried children under 21 of U.S. citizens = immediate relative (no wait).\nOther cases have categories with waiting times.'
+    },
+    choices: [
+      { label: { es: '📋 Evaluar mi caso específico', en: '📋 Evaluate my specific case' }, next: 'END_CONSULT' },
+    ]
+  },
+  family_parent: {
+    bot: {
+      es: 'Solo los ciudadanos americanos (no residentes) pueden peticionar a sus padres, y es categoría inmediata sin lista de espera. Los documentos clave incluyen el acta de nacimiento del ciudadano y del padre/madre.\n\n¿El hijo/a que peticiona ya es ciudadano americano y tiene 21 años o más?',
+      en: 'Only U.S. citizens (not residents) can petition for parents, and it\'s an immediate relative category with no waiting list. Key documents include the citizen\'s birth certificate and parent\'s documents.\n\nIs the petitioning child a U.S. citizen who is 21 or older?'
+    },
+    choices: [
+      { label: { es: '✅ Sí', en: '✅ Yes' }, next: 'END_CONSULT' },
+      { label: { es: '❌ No', en: '❌ No' }, next: 'family_parent_no' },
+    ]
+  },
+  family_parent_no: {
+    bot: {
+      es: 'Lamentablemente, si el hijo/a aún no es ciudadano americano o tiene menos de 21 años, no puede peticionar a sus padres todavía. Sin embargo, puede haber otras opciones para su situación.',
+      en: 'Unfortunately, if the child is not yet a U.S. citizen or is under 21, they cannot yet petition for parents. However, there may be other options for your situation.'
+    },
+    choices: [
+      { label: { es: '📋 Explorar otras opciones', en: '📋 Explore other options' }, next: 'END_CONSULT' },
+    ]
+  },
+  family_other: {
+    bot: {
+      es: 'Las peticiones para hermanos y otros familiares tienen tiempos de espera largos (a veces más de 10 años para ciertas categorías). Sin embargo, iniciar el proceso cuanto antes es importante para reservar su fecha de prioridad.',
+      en: 'Sibling and other relative petitions have long waiting times (sometimes 10+ years for certain categories). However, starting the process as early as possible is important to establish your priority date.'
+    },
+    choices: [
+      { label: { es: '📋 Iniciar el proceso', en: '📋 Start the process' }, next: 'END_CONSULT' },
+      { label: { es: '❓ Tengo más preguntas', en: '❓ I have more questions' }, next: 'contact_options' },
+    ]
+  },
+
+  // ── CITIZENSHIP BRANCH ───────────────────────────────────
+  citizenship_q1: {
+    bot: {
+      es: '¿Cuál es su situación actual?',
+      en: 'What is your current situation?'
+    },
+    choices: [
+      { label: { es: '💚 Tengo Green Card y quiero naturalizarme', en: '💚 I have a Green Card and want to naturalize' }, next: 'citizenship_gc' },
+      { label: { es: '📋 Quiero saber si califico', en: '📋 I want to know if I qualify' }, next: 'citizenship_qualify' },
+      { label: { es: '🧒 Tengo hijos que podrían ser ciudadanos', en: '🧒 I have children who may be citizens' }, next: 'citizenship_child' },
+    ]
+  },
+  citizenship_gc: {
+    bot: {
+      es: 'Para naturalizarse generalmente necesita:\n\n• <strong>5 años</strong> como residente permanente (o <strong>3 años</strong> si es cónyuge de ciudadano)\n• Presencia física continua (sin ausencias largas)\n• Buen carácter moral\n• Inglés básico (hay excepciones por edad)\n• Pasar el examen cívico (100 preguntas, responde 10)\n\n¿Cuánto tiempo lleva con su Green Card?',
+      en: 'To naturalize you generally need:\n\n• <strong>5 years</strong> as a permanent resident (or <strong>3 years</strong> if married to a citizen)\n• Continuous physical presence (no extended absences)\n• Good moral character\n• Basic English (exceptions for age/disability)\n• Pass the civics test (100 questions, answer 10)\n\nHow long have you had your Green Card?'
+    },
+    choices: [
+      { label: { es: '⏰ Menos de 3 años', en: '⏰ Less than 3 years' }, next: 'citizenship_too_soon' },
+      { label: { es: '✅ 3-5 años (cónyuge de ciudadano)', en: '✅ 3-5 years (spouse of citizen)' }, next: 'END_CONSULT' },
+      { label: { es: '✅ Más de 5 años', en: '✅ More than 5 years' }, next: 'citizenship_ready' },
+    ]
+  },
+  citizenship_too_soon: {
+    bot: {
+      es: 'Aún no cumple el requisito de tiempo, pero es un buen momento para empezar a prepararse. También puede verificar si ha viajado frecuentemente al exterior — eso puede afectar su elegibilidad.',
+      en: 'You don\'t yet meet the time requirement, but this is a good time to start preparing. You should also check if you\'ve traveled abroad frequently — that can affect your eligibility.'
+    },
+    choices: [
+      { label: { es: '📋 Planificar con anticipación', en: '📋 Plan ahead' }, next: 'END_CONSULT' },
+    ]
+  },
+  citizenship_ready: {
+    bot: {
+      es: '¡Podría estar listo/a para aplicar! El Formulario N-400 es la solicitud de naturalización. Los tiempos de procesamiento actuales en el área de Orlando son de aproximadamente 8-14 meses.\n\nLa abogada Valle puede revisar su historial para asegurar que no haya problemas antes de aplicar.',
+      en: 'You may be ready to apply! Form N-400 is the naturalization application. Current processing times in the Orlando area are approximately 8-14 months.\n\nAttorney Valle can review your history to ensure there are no issues before you apply.'
+    },
+    choices: [
+      { label: { es: '📋 Iniciar mi naturalización', en: '📋 Start my naturalization' }, next: 'END_CONSULT' },
+      { label: { es: '📞 Llamar a la oficina', en: '📞 Call the office' }, next: 'END_CALL', href: 'tel:+14078901018' },
+    ]
+  },
+  citizenship_qualify: {
+    bot: {
+      es: 'Determinar si califica para la ciudadanía depende de muchos factores. Una evaluación rápida con la abogada Valle le dará claridad total sobre su camino hacia la ciudadanía americana.',
+      en: 'Determining whether you qualify for citizenship depends on many factors. A quick evaluation with Attorney Valle will give you full clarity on your path to U.S. citizenship.'
+    },
+    choices: [
+      { label: { es: '📋 Evaluación gratuita', en: '📋 Free evaluation' }, next: 'END_CONSULT' },
+    ]
+  },
+  citizenship_child: {
+    bot: {
+      es: 'Los hijos pueden adquirir ciudadanía automáticamente en ciertos casos (Child Citizenship Act). Si al menos uno de los padres es ciudadano y el niño es residente permanente, puede que ya sea ciudadano sin saberlo.',
+      en: 'Children can acquire citizenship automatically in certain cases (Child Citizenship Act). If at least one parent is a citizen and the child is a permanent resident, they may already be a citizen without knowing it.'
+    },
+    choices: [
+      { label: { es: '📋 Verificar ciudadanía de mis hijos', en: '📋 Verify my children\'s citizenship' }, next: 'END_CONSULT' },
+    ]
+  },
+
+  // ── SERVICES MENU ────────────────────────────────────────
+  services_menu: {
+    bot: {
+      es: 'Valle & Panzardi ofrece representación completa en todas las áreas del derecho migratorio. ¿Qué área le interesa?',
+      en: 'Valle & Panzardi offers complete representation in all areas of immigration law. Which area interests you?'
+    },
+    choices: [
+      { label: { es: '🌿 Green Card / Residencia', en: '🌿 Green Card / Residency' }, next: 'greencard_q1' },
+      { label: { es: '🙏 Asilo y Refugio', en: '🙏 Asylum & Refugee' }, next: 'asylum_q1' },
+      { label: { es: '🚨 Deportación / Remoción', en: '🚨 Deportation / Removal' }, next: 'deportation_q1' },
+      { label: { es: '📄 DACA y Visas', en: '📄 DACA & Visas' }, next: 'visa_daca' },
+      { label: { es: '👨‍👩‍👧 Peticiones Familiares', en: '👨‍👩‍👧 Family Petitions' }, next: 'family_q1' },
+      { label: { es: '🏛️ Ciudadanía / Naturalización', en: '🏛️ Citizenship / Naturalization' }, next: 'citizenship_q1' },
+    ]
+  },
+
+  // ── CONTACT OPTIONS ──────────────────────────────────────
+  contact_options: {
+    bot: {
+      es: '¿Cómo prefiere comunicarse?',
+      en: 'How would you prefer to connect?'
+    },
+    choices: [
+      { label: { es: '📞 Llamar: (407) 890-1018', en: '📞 Call: (407) 890-1018' }, next: 'END_CALL', href: 'tel:+14078901018' },
+      { label: { es: '📞 Ft. Walton: (850) 217-6665', en: '📞 Ft. Walton: (850) 217-6665' }, next: 'END_CALL', href: 'tel:+18502176665' },
+      { label: { es: '✉️ Formulario de contacto', en: '✉️ Contact form' }, next: 'END_CONSULT' },
+      { label: { es: '📧 Email directo', en: '📧 Direct email' }, next: 'END_CALL', href: 'mailto:karinvalle@vfilaw.com' },
+    ]
+  },
+
+  // ── FREE TEXT FALLBACK ───────────────────────────────────
+  freetext: {
+    bot: {
+      es: 'Por supuesto, escriba su pregunta y le responderé lo mejor que pueda. Para casos complejos, le conectaré con la abogada Valle.',
+      en: 'Of course, type your question and I\'ll do my best to answer. For complex cases, I\'ll connect you with Attorney Valle.'
+    },
+    choices: [],
+    input: true
+  },
+
+  // ── END STATES ───────────────────────────────────────────
+  END_CONSULT: {
+    bot: {
+      es: '✅ Perfecto. Haga clic abajo para ir al formulario de consulta. El equipo de Valle & Panzardi le contactará en menos de 24 horas.\n\n📍 Orlando: 1060 Woodcock Rd, Suite 135\n🕐 Lun–Vie: 9am–5pm',
+      en: '✅ Perfect. Click below to go to the consultation form. The Valle & Panzardi team will contact you within 24 hours.\n\n📍 Orlando: 1060 Woodcock Rd, Suite 135\n🕐 Mon–Fri: 9am–5pm'
+    },
+    choices: [
+      { label: { es: '📋 Ir al formulario de consulta →', en: '📋 Go to consultation form →' }, next: null, href: './contact.html', cta: true },
+      { label: { es: '🔄 Hacer otra pregunta', en: '🔄 Ask another question' }, next: 'start' },
+    ]
+  },
+
+  END_CALL: {
+    bot: {
+      es: '📞 Nuestro equipo estará encantado de atenderle.\n\n<strong>Orlando:</strong> (407) 890-1018\n<strong>Ft. Walton Beach:</strong> (850) 217-6665\n\n🕐 Lun–Vie: 9am–5pm\n✉️ karinvalle@vfilaw.com',
+      en: '📞 Our team will be happy to assist you.\n\n<strong>Orlando:</strong> (407) 890-1018\n<strong>Ft. Walton Beach:</strong> (850) 217-6665\n\n🕐 Mon–Fri: 9am–5pm\n✉️ karinvalle@vfilaw.com'
+    },
+    choices: [
+      { label: { es: '🔄 Hacer otra pregunta', en: '🔄 Ask another question' }, next: 'start' },
+    ]
   }
-  function closeChat() {
-    isOpen = false;
-    win.setAttribute('hidden', '');
-    trigger.setAttribute('aria-expanded', 'false');
-    iconOpen.style.display = '';
-    iconClose.style.display = 'none';
-  }
+};
 
-  trigger.addEventListener('click', () => isOpen ? closeChat() : openChat());
-  document.getElementById('chat-close-btn').addEventListener('click', closeChat);
+// ─── KEYWORD MATCHER for free text input ─────────────────────────────────────
+function matchKeyword(text) {
+  const t = text.toLowerCase();
+  if (t.match(/deport|remov|orden|remoción/)) return 'deportation_q1';
+  if (t.match(/green.?card|residenc|i-485|i-130/)) return 'greencard_q1';
+  if (t.match(/asilo|asylum|refugi/)) return 'asylum_q1';
+  if (t.match(/daca|deferred/)) return 'daca_renewal';
+  if (t.match(/visa|h-1b|h1b|f-1|f1|k-1|k1|tn visa/)) return 'work_visa';
+  if (t.match(/ciudadan|naturaliz|citizen/)) return 'citizenship_q1';
+  if (t.match(/familia|petition|pariente|cónyuge|spouse|hijo|child/)) return 'family_q1';
+  if (t.match(/precio|costo|cost|fee|cuánto|cobran|charge/)) return null; // handle below
+  if (t.match(/hola|hello|hi|buenos|buenas/)) return 'start';
+  if (t.match(/gracias|thanks|thank you/)) return null;
+  return null;
+}
 
-  function greet() {
-    const lang = getLang();
-    addMsg(lang === 'en'
-      ? '👋 Hi! I\'m the virtual assistant for Valle & Panzardi. How can I help you today?'
-      : '👋 ¡Hola! Soy el asistente virtual de Valle & Panzardi. ¿En qué le puedo ayudar hoy?', 'bot');
-  }
+// ─── ENGINE ───────────────────────────────────────────────────────────────────
+const trigger   = document.getElementById('chat-trigger');
+const win       = document.getElementById('chat-window');
+const badge     = document.getElementById('chat-badge');
+const iconOpen  = document.getElementById('chat-icon-open');
+const iconClose = document.getElementById('chat-icon-close');
+const msgArea   = document.getElementById('chat-messages');
+const choiceArea= document.getElementById('chat-choices');
+const form      = document.getElementById('chat-form');
+const input     = document.getElementById('chat-input');
 
-  function addMsg(text, type) {
-    const el = document.createElement('div');
-    el.className = `chat-msg ${type}`;
-    el.innerHTML = text;
-    msgs.appendChild(el);
-    msgs.scrollTop = msgs.scrollHeight;
-  }
+let isOpen = false;
+let started = false;
+let currentNode = 'start';
 
-  function showTyping() {
-    const el = document.createElement('div');
-    el.className = 'chat-typing'; el.id = 'typing-indicator';
-    el.innerHTML = '<span></span><span></span><span></span>';
-    msgs.appendChild(el);
-    msgs.scrollTop = msgs.scrollHeight;
-    return el;
-  }
+function getLang() { return document.body.classList.contains('lang-en') ? 'en' : 'es'; }
 
-  function getResponse(text) {
-    const lang = getLang();
-    const answers = lang === 'en' ? ANSWERS_EN : ANSWERS_ES;
-    const t = text.toLowerCase();
-    if (t.match(/green.?card|residenc|residencia/)) return answers.greencard;
-    if (t.match(/asilo|asylum|refugi/)) return answers.asilo;
-    if (t.match(/daca|deferred/)) return answers.daca;
-    if (t.match(/deporta|remov|remoción/)) return answers.deportacion;
-    return answers.default;
-  }
+function openChat() {
+  isOpen = true;
+  win.removeAttribute('hidden');
+  trigger.setAttribute('aria-expanded', 'true');
+  iconOpen.style.display = 'none';
+  iconClose.style.display = '';
+  badge.classList.add('hidden');
+  if (!started) { started = true; setTimeout(() => goTo('start'), 300); }
+  setTimeout(() => input.focus(), 350);
+}
 
-  function sendMsg(text) {
-    if (!text.trim()) return;
-    addMsg(text, 'user');
-    input.value = '';
-    document.getElementById('chat-quick-replies').style.display = 'none';
+function closeChat() {
+  isOpen = false;
+  win.setAttribute('hidden', '');
+  trigger.setAttribute('aria-expanded', 'false');
+  iconOpen.style.display = '';
+  iconClose.style.display = 'none';
+}
+
+trigger.addEventListener('click', () => isOpen ? closeChat() : openChat());
+document.getElementById('chat-close-btn').addEventListener('click', closeChat);
+
+function addMsg(text, type) {
+  // format newlines
+  const formatted = text.replace(/\n/g, '<br>');
+  const el = document.createElement('div');
+  el.className = 'chat-msg ' + type;
+  el.innerHTML = formatted;
+  msgArea.appendChild(el);
+  msgArea.scrollTop = msgArea.scrollHeight;
+  return el;
+}
+
+function showTyping() {
+  const el = document.createElement('div');
+  el.className = 'chat-typing';
+  el.innerHTML = '<span></span><span></span><span></span>';
+  msgArea.appendChild(el);
+  msgArea.scrollTop = msgArea.scrollHeight;
+  return el;
+}
+
+function clearChoices() {
+  choiceArea.innerHTML = '';
+  choiceArea.className = 'chat-choices';
+}
+
+function renderChoices(choices) {
+  clearChoices();
+  if (!choices || !choices.length) return;
+
+  const isRow = choices.length <= 3 && choices.every(c => (c.label[getLang()] || '').length < 22);
+  if (isRow) choiceArea.classList.add('row');
+
+  choices.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn' + (isRow ? ' pill' : '') + (choice.cta ? ' cta' : '');
+    btn.textContent = choice.label[getLang()] || choice.label.es;
+    btn.addEventListener('click', () => {
+      clearChoices();
+      addMsg(btn.textContent, 'user');
+      if (choice.href) {
+        // External link choices
+        if (choice.next === 'END_CALL') {
+          setTimeout(() => { window.open(choice.href, choice.href.startsWith('mailto') ? '_blank' : '_self'); }, 100);
+          goTo('END_CALL');
+        } else {
+          window.location.href = choice.href;
+        }
+      } else if (choice.next === null) {
+        window.location.href = './contact.html';
+      } else if (choice.next) {
+        goTo(choice.next);
+      }
+    });
+    choiceArea.appendChild(btn);
+  });
+}
+
+function goTo(nodeId, delay = 600) {
+  currentNode = nodeId;
+  const node = TREE[nodeId];
+  if (!node) return;
+
+  const typing = showTyping();
+  const lang = getLang();
+
+  setTimeout(() => {
+    typing.remove();
+    addMsg(node.bot[lang] || node.bot.es, 'bot');
+
+    if (node.input) {
+      // Free text mode
+      input.placeholder = lang === 'en' ? 'Type your question...' : 'Escribe tu pregunta...';
+      input.focus();
+    } else {
+      renderChoices(node.choices || []);
+    }
+  }, delay);
+}
+
+// Free text form handling
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  const val = input.value.trim();
+  if (!val) return;
+  addMsg(val, 'user');
+  input.value = '';
+  clearChoices();
+
+  const lang = getLang();
+
+  // Check for special responses first
+  if (val.toLowerCase().match(/precio|costo|cost|fee|cuánto|cobran|honorario/)) {
     const typing = showTyping();
     setTimeout(() => {
       typing.remove();
-      addMsg(getResponse(text), 'bot');
-    }, 900 + Math.random() * 400);
+      addMsg(lang === 'en'
+        ? 'Our fees vary by case type and complexity. We offer a <strong>free initial consultation</strong> to evaluate your situation and provide a transparent fee quote. There are no surprises.'
+        : 'Nuestros honorarios varían según el tipo y complejidad del caso. Ofrecemos una <strong>consulta inicial gratuita</strong> para evaluar su situación y darle una cotización transparente. Sin sorpresas.'
+        , 'bot');
+      renderChoices([
+        { label: { es: '📋 Consulta gratuita', en: '📋 Free consultation' }, next: 'END_CONSULT' },
+        { label: { es: '📞 Llamar ahora', en: '📞 Call now' }, next: 'END_CALL', href: 'tel:+14078901018' },
+      ]);
+    }, 700);
+    return;
   }
 
-  form.addEventListener('submit', e => { e.preventDefault(); sendMsg(input.value); });
+  if (val.toLowerCase().match(/gracias|thank/)) {
+    const typing = showTyping();
+    setTimeout(() => {
+      typing.remove();
+      addMsg(lang === 'en' ? 'You\'re welcome! Is there anything else I can help you with?' : '¡De nada! ¿Hay algo más en lo que pueda ayudarle?', 'bot');
+      renderChoices([
+        { label: { es: '🔄 Sí, tengo otra pregunta', en: '🔄 Yes, I have another question' }, next: 'start' },
+        { label: { es: '👍 No, eso es todo', en: '👍 No, that\'s all' }, next: 'END_CONSULT' },
+      ]);
+    }, 500);
+    return;
+  }
 
-  document.querySelectorAll('.qr-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const lang = getLang();
-      sendMsg(lang === 'en' ? btn.dataset.msgEn : btn.dataset.msgEs);
-    });
-  });
+  const match = matchKeyword(val);
+  if (match) {
+    goTo(match, 800);
+  } else {
+    const typing = showTyping();
+    setTimeout(() => {
+      typing.remove();
+      addMsg(lang === 'en'
+        ? 'Thank you for your question. For the most accurate answer, I\'ll connect you with our team. You can reach us at <strong>(407) 890-1018</strong> or request a consultation below.'
+        : 'Gracias por su pregunta. Para darle la respuesta más precisa, le conectaré con nuestro equipo. Puede contactarnos al <strong>(407) 890-1018</strong> o solicitar una consulta abajo.'
+        , 'bot');
+      renderChoices([
+        { label: { es: '📋 Solicitar consulta', en: '📋 Request consultation' }, next: 'END_CONSULT' },
+        { label: { es: '📞 Llamar', en: '📞 Call' }, next: 'END_CALL', href: 'tel:+14078901018' },
+      ]);
+    }, 900);
+  }
+});
 
-  // Auto-open after 8s if not dismissed
-  setTimeout(() => { if (!isOpen) openChat(); }, 8000);
+// Auto-open after 10s
+setTimeout(() => { if (!isOpen) openChat(); }, 10000);
+
 })();
 </script>
 
