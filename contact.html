@@ -377,7 +377,7 @@ document.querySelectorAll('[data-lang-switch]').forEach(btn => {
 });
 (function(){
   const root = document.documentElement;
-  let d = localStorage.getItem('theme') || 'light';
+  let d = (function(){ try { return localStorage.getItem('theme') || 'light'; } catch(e) { return 'light'; } })();
   root.setAttribute('data-theme', d);
   function updateToggleIcon() {
     document.querySelectorAll('[data-theme-toggle]').forEach(t => {
@@ -389,7 +389,7 @@ document.querySelectorAll('[data-lang-switch]').forEach(btn => {
   }
   updateToggleIcon();
   document.querySelectorAll('[data-theme-toggle]').forEach(t => {
-    t.addEventListener('click', () => { d = d === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', d); localStorage.setItem('theme', d); updateToggleIcon(); });
+    t.addEventListener('click', () => { d = d === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', d); try { localStorage.setItem('theme', d); } catch(e) {} updateToggleIcon(); });
   });
 })();
 const menuToggle = document.getElementById('menu-toggle');
