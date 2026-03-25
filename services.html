@@ -94,6 +94,7 @@ a, button, [role="button"], [role="link"], input, textarea, select {
 </style>
 <link rel="stylesheet" href="./style.min.css">
 <meta name="theme-color" content="#1a3a5c">
+<link rel="preload" href="./assets/services-strip.webp" as="image" type="image/webp">
 </head>
 <body>
 
@@ -180,9 +181,12 @@ a, button, [role="button"], [role="link"], input, textarea, select {
   </section>
 
   <!-- FULL-BLEED DIVIDER IMAGE -->
-  <div style="width:100%; height:320px; overflow:hidden; position:relative;">
-    <picture><source srcset="./assets/services-bg.webp" type="image/webp"><img src="./assets/services-bg.png" alt="Attorney reviewing immigration documents with American flag" loading="lazy" width="1920" height="1080" style="width:100%; height:100%; object-fit:cover; object-position:center 40%;"></picture>
-    <div style="position:absolute; inset:0; background: linear-gradient(to bottom, oklch(0.12 0.04 240 / 0.6), oklch(0.12 0.04 240 / 0.2));"></div>
+  <div style="width:100%; height:320px; overflow:hidden; position:relative; background:#1a3a5c;">
+    <picture>
+      <source srcset="./assets/services-strip.webp" type="image/webp">
+      <img src="./assets/services-bg.png" alt="Attorney reviewing immigration documents with American flag" loading="eager" fetchpriority="high" decoding="async" width="900" height="540" style="width:100%; height:100%; object-fit:cover; object-position:center 40%;">
+    </picture>
+    <div style="position:absolute; inset:0; background: linear-gradient(to bottom, rgba(26,58,92,0.6), rgba(26,58,92,0.2));"></div>
   </div>
 
   <!-- SERVICES GRID -->
