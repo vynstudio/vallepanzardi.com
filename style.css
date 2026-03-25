@@ -572,7 +572,7 @@ h1, h2, h3, h4, h5, h6 {
    TRUST BAR
    ============================================ */
 .trust-bar {
-  background: var(--color-primary);
+  background: #1b2d4f;
   padding: var(--space-5) var(--space-6);
 }
 
@@ -873,7 +873,7 @@ h1, h2, h3, h4, h5, h6 {
    CTA BAND
    ============================================ */
 .cta-band {
-  background: var(--color-primary);
+  background: #1b2d4f;
   padding-block: clamp(var(--space-12), 6vw, var(--space-24));
   position: relative;
   overflow: hidden;
@@ -989,7 +989,7 @@ h1, h2, h3, h4, h5, h6 {
    FOOTER
    ============================================ */
 .site-footer {
-  background: var(--color-primary);
+  background: #1b2d4f;
   color: rgba(255,255,255,0.85);
   padding-block: clamp(var(--space-12), 5vw, var(--space-20));
 }
