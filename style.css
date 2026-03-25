@@ -1073,6 +1073,10 @@ h1, h2, h3, h4, h5, h6 {
 [data-lang="es"] { display: block; }
 span[data-lang="es"] { display: inline; }
 span[data-lang="en"] { display: none; }
+a[data-lang="es"] { display: inline-flex; }
+a[data-lang="en"] { display: none; }
+button[data-lang="es"] { display: inline-flex; }
+button[data-lang="en"] { display: none; }
 
 .inline-en { display: none; }
 .inline-es { display: inline; }
@@ -1081,6 +1085,10 @@ body.lang-en [data-lang="en"] { display: block; }
 body.lang-en [data-lang="es"] { display: none; }
 body.lang-en span[data-lang="en"] { display: inline; }
 body.lang-en span[data-lang="es"] { display: none; }
+body.lang-en a[data-lang="en"] { display: inline-flex; }
+body.lang-en a[data-lang="es"] { display: none; }
+body.lang-en button[data-lang="en"] { display: inline-flex; }
+body.lang-en button[data-lang="es"] { display: none; }
 body.lang-en .inline-en { display: inline; }
 body.lang-en .inline-es { display: none; }
 
