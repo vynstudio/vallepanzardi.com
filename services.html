@@ -163,64 +163,8 @@ a, button, [role="button"], [role="link"], input, textarea, select {
 
 <main id="main">
 
-  <section class="page-header" aria-label="Page header" style="position:relative;overflow:hidden;min-height:72vh;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:clamp(3rem,6vw,5rem);">
-
-    <!-- A6: Vertical stripe pulse animation -->
-    <div aria-hidden="true" id="flag-stripes" style="position:absolute;inset:0;display:flex;z-index:0;pointer-events:none;"></div>
-
-    <!-- Centre emblem -->
-    <div aria-hidden="true" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-end;padding-right:8%;z-index:1;pointer-events:none;">
-      <div style="width:100px;height:100px;border-radius:50%;border:1.5px solid rgba(201,168,76,0.35);display:flex;align-items:center;justify-content:center;position:relative;">
-        <div style="position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(201,168,76,0.18);animation:emblem-ring 3s ease-in-out infinite alternate;transform-origin:center;"></div>
-        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="rgba(201,168,76,0.65)" stroke-width="1.2" style="animation:emblem-glow 3s ease-in-out infinite alternate;">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-      </div>
-    </div>
-
-    <style>
-      @keyframes vpulse-r {
-        0%,100% { opacity: 0.18; transform: scaleY(1); }
-        50%      { opacity: 0.55; transform: scaleY(1.05); }
-      }
-      @keyframes vpulse-w {
-        0%,100% { opacity: 0.10; transform: scaleY(1); }
-        50%      { opacity: 0.32; transform: scaleY(1.05); }
-      }
-      @keyframes emblem-ring {
-        from { transform: scale(1);   opacity: 0.4; }
-        to   { transform: scale(1.12); opacity: 0.9; }
-      }
-      @keyframes emblem-glow {
-        from { opacity: 0.5; }
-        to   { opacity: 1;   }
-      }
-    </style>
-
-    <script>
-    (function(){
-      var wrap = document.getElementById('flag-stripes');
-      if (!wrap) return;
-      var N = 36;
-      for (var i = 0; i < N; i++) {
-        var d = document.createElement('div');
-        var isRed = i % 2 === 0;
-        var delay = (i * 0.11).toFixed(2);
-        d.style.cssText = [
-          'flex:1',
-          'height:100%',
-          'background:' + (isRed
-            ? 'linear-gradient(to bottom, transparent 0%, rgba(180,12,38,0.72) 40%, rgba(180,12,38,0.72) 60%, transparent 100%)'
-            : 'linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.55) 40%, rgba(255,255,255,0.55) 60%, transparent 100%)'),
-          'animation:' + (isRed ? 'vpulse-r' : 'vpulse-w') + ' 3s ease-in-out ' + delay + 's infinite',
-          'transform-origin:center'
-        ].join(';');
-        wrap.appendChild(d);
-      }
-    })();
-    </script>
-
-    <div class="page-header-inner" style="position:relative;z-index:2;">
+  <section class="page-header" aria-label="Page header">
+    <div class="page-header-inner">
       <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="./index.html" data-lang="es">Inicio</a>
         <a href="./index.html" data-lang="en">Home</a>
@@ -232,49 +176,17 @@ a, button, [role="button"], [role="link"], input, textarea, select {
       <h1 data-lang="en">Immigration Services</h1>
       <p data-lang="es">Representación legal integral en todas las áreas del derecho migratorio</p>
       <p data-lang="en">Comprehensive legal representation in all areas of immigration law</p>
-
-      <!-- CTAs -->
-      <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:2rem;">
-        <a href="./contact.html" class="btn-gold" data-lang="es">Consulta Gratuita</a>
-        <a href="./contact.html" class="btn-gold" data-lang="en">Free Consultation</a>
-        <a href="tel:+14078901018" class="btn-outline-white" data-lang="es">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.36a2 2 0 0 1 1.95-2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.91-1.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          (407) 890-1018
-        </a>
-        <a href="tel:+14078901018" class="btn-outline-white" data-lang="en">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.36a2 2 0 0 1 1.95-2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.91-1.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          (407) 890-1018
-        </a>
-      </div>
-
-      <!-- Stats row -->
-      <div style="display:flex;gap:2.5rem;flex-wrap:wrap;margin-top:2.5rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,0.15);">
-        <div>
-          <div style="font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;color:var(--color-gold);line-height:1;">10+</div>
-          <div style="font-size:0.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-top:4px;" data-lang="es">Años de Experiencia</div>
-          <div style="font-size:0.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-top:4px;" data-lang="en">Years of Experience</div>
-        </div>
-        <div style="width:1px;background:rgba(255,255,255,0.15);align-self:stretch;"></div>
-        <div>
-          <div style="font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;color:var(--color-gold);line-height:1;">8</div>
-          <div style="font-size:0.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-top:4px;" data-lang="es">Áreas de Práctica</div>
-          <div style="font-size:0.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-top:4px;" data-lang="en">Practice Areas</div>
-        </div>
-        <div style="width:1px;background:rgba(255,255,255,0.15);align-self:stretch;"></div>
-        <div>
-          <div style="font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;color:var(--color-gold);line-height:1;">2</div>
-          <div style="font-size:0.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-top:4px;" data-lang="es">Oficinas en Florida</div>
-          <div style="font-size:0.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-top:4px;" data-lang="en">Florida Offices</div>
-        </div>
-        <div style="width:1px;background:rgba(255,255,255,0.15);align-self:stretch;"></div>
-        <div>
-          <div style="font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;color:var(--color-gold);line-height:1;">100%</div>
-          <div style="font-size:0.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-top:4px;" data-lang="es">Dedicación al Cliente</div>
-          <div style="font-size:0.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-top:4px;" data-lang="en">Client Dedication</div>
-        </div>
-      </div>
     </div>
   </section>
+
+  <!-- FULL-BLEED DIVIDER IMAGE -->
+  <div style="width:100%; height:320px; overflow:hidden; position:relative; background:#1a3a5c;">
+    <picture>
+      <source srcset="./assets/services-strip.webp" type="image/webp">
+      <img src="./assets/services-bg.png" alt="Attorney reviewing immigration documents with American flag" loading="eager" fetchpriority="high" decoding="async" width="900" height="540" style="width:100%; height:100%; object-fit:cover; object-position:center 40%;">
+    </picture>
+    <div style="position:absolute; inset:0; background: linear-gradient(to bottom, rgba(26,58,92,0.6), rgba(26,58,92,0.2));"></div>
+  </div>
 
 
 
