@@ -572,7 +572,7 @@ h1, h2, h3, h4, h5, h6 {
    TRUST BAR
    ============================================ */
 .trust-bar {
-  background: var(--color-primary);
+  background: #1b2d4f;
   padding: var(--space-5) var(--space-6);
 }
 
@@ -598,6 +598,16 @@ h1, h2, h3, h4, h5, h6 {
 .trust-item svg {
   color: var(--color-gold);
   flex-shrink: 0;
+}
+
+.trust-link {
+  color: rgba(255,255,255,0.9);
+  text-decoration: none;
+  font-weight: 600;
+}
+.trust-link:hover {
+  color: #fff;
+  text-decoration: underline;
 }
 
 .trust-divider {
@@ -1546,9 +1556,10 @@ body.lang-en .inline-es { display: none !important; }
 
   /* Trust bar */
   .trust-bar { padding: var(--space-4) var(--space-5); }
-  .trust-bar-inner { flex-direction: column; gap: var(--space-3); align-items: flex-start; }
+  .trust-bar-inner { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3) var(--space-4); align-items: center; justify-items: start; }
   .trust-divider { display: none; }
-  .trust-item { font-size: var(--text-sm); }
+  .trust-item { font-size: var(--text-sm); gap: var(--space-2); }
+  .trust-item svg { width: 16px; height: 16px; }
 
   /* Sections */
   .section { padding-block: var(--space-12) var(--space-12); }
