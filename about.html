@@ -26,6 +26,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./base.css">
 <link rel="stylesheet" href="./style.css">
+<meta name="theme-color" content="#1a3a5c">
 </head>
 <body>
 
@@ -118,7 +119,7 @@
     <div class="section-inner">
       <div class="about-full-grid">
         <div class="about-full-image reveal">
-          <img src="./assets/attorney.png" alt="Abogada de inmigración Valle Fabricio en su oficina de Orlando" loading="lazy" width="600" height="600">
+          <picture><source srcset="./assets/attorney.webp" type="image/webp"><img src="./assets/attorney.png" alt="Abogada de inmigración Valle Fabricio en su oficina de Orlando" loading="lazy" width="600" height="600"></picture>
         </div>
         <div class="about-full-content">
           <div style="margin-bottom: var(--space-4);">
@@ -345,5 +346,240 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
 reveals.forEach(el => observer.observe(el));
 </script>
+
+<!-- ========== CHATBOT ========== -->
+<div id="vfi-chat" aria-label="Chat de consulta" role="complementary">
+  <!-- Bubble trigger -->
+  <button id="chat-trigger" aria-label="Abrir chat / Open chat" aria-expanded="false" aria-controls="chat-window">
+    <svg id="chat-icon-open" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <svg id="chat-icon-close" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="display:none"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    <span class="chat-badge" id="chat-badge">1</span>
+  </button>
+
+  <!-- Chat window -->
+  <div id="chat-window" role="dialog" aria-label="Consulta rápida" aria-modal="false" hidden>
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <div class="chat-avatar" aria-hidden="true">VP</div>
+        <div>
+          <strong>Valle &amp; Panzardi</strong>
+          <span class="chat-status" data-lang="es">Responde en minutos</span>
+          <span class="chat-status" data-lang="en">Replies in minutes</span>
+        </div>
+      </div>
+      <button id="chat-close-btn" aria-label="Cerrar chat">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="chat-messages" id="chat-messages" aria-live="polite" aria-relevant="additions">
+      <!-- Greeting injected by JS -->
+    </div>
+
+    <div class="chat-quick-replies" id="chat-quick-replies">
+      <button class="qr-btn" data-msg-es="¿Cómo funciona el proceso de Green Card?" data-msg-en="How does the Green Card process work?">Green Card</button>
+      <button class="qr-btn" data-msg-es="¿Qué documentos necesito para solicitar asilo?" data-msg-en="What documents do I need to apply for asylum?">Asilo / Asylum</button>
+      <button class="qr-btn" data-msg-es="¿Cómo puedo renovar mi DACA?" data-msg-en="How can I renew my DACA?">DACA</button>
+      <button class="qr-btn" data-msg-es="¿Qué hago si recibí una orden de deportación?" data-msg-en="What do I do if I received a deportation order?">Deportación</button>
+    </div>
+
+    <form class="chat-input-row" id="chat-form" autocomplete="off">
+      <input type="text" id="chat-input" placeholder="Escribe tu pregunta..." aria-label="Mensaje" maxlength="300">
+      <button type="submit" aria-label="Enviar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+      </button>
+    </form>
+    <p class="chat-disclaimer" data-lang="es">Este chat es orientativo. Para asesoría legal, <a href="./contact.html">solicite una consulta</a>.</p>
+    <p class="chat-disclaimer" data-lang="en">This chat is informational. For legal advice, <a href="./contact.html">request a consultation</a>.</p>
+  </div>
+</div>
+
+<style>
+/* ---- CHATBOT STYLES ---- */
+#vfi-chat { position: fixed; bottom: 24px; right: 24px; z-index: 9999; font-family: var(--font-sans, 'DM Sans', sans-serif); }
+
+#chat-trigger {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--color-primary, #1a3a5c); color: #fff;
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  transition: transform .2s, box-shadow .2s; position: relative;
+}
+#chat-trigger:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(0,0,0,0.32); }
+.chat-badge {
+  position: absolute; top: -4px; right: -4px;
+  background: var(--color-gold, #c9a84c); color: #fff;
+  font-size: 11px; font-weight: 700;
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+@keyframes pulse-badge { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+.chat-badge.hidden { display: none; }
+
+#chat-window {
+  position: absolute; bottom: 68px; right: 0;
+  width: 340px; background: var(--color-surface, #fff);
+  border-radius: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  display: flex; flex-direction: column; overflow: hidden;
+  animation: chat-in .2s ease;
+}
+@keyframes chat-in { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+#chat-window[hidden] { display: none; }
+
+.chat-header {
+  background: var(--color-primary, #1a3a5c); color: #fff;
+  padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+}
+.chat-header-info { display: flex; align-items: center; gap: 10px; }
+.chat-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--color-gold, #c9a84c); color: #fff;
+  font-weight: 700; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+.chat-header-info strong { display: block; font-size: 0.9rem; }
+.chat-status { font-size: 0.75rem; opacity: 0.85; }
+#chat-close-btn { background: none; border: none; color: #fff; cursor: pointer; opacity: 0.8; padding: 4px; }
+#chat-close-btn:hover { opacity: 1; }
+
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; max-height: 260px; }
+.chat-msg { max-width: 82%; padding: 10px 13px; border-radius: 16px; font-size: 0.875rem; line-height: 1.45; animation: msg-in .18s ease; }
+@keyframes msg-in { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.chat-msg.bot { background: var(--color-surface-alt, #f0f4f8); color: var(--color-text, #1a202c); border-bottom-left-radius: 4px; align-self: flex-start; }
+.chat-msg.user { background: var(--color-primary, #1a3a5c); color: #fff; border-bottom-right-radius: 4px; align-self: flex-end; }
+.chat-typing { display: flex; gap: 4px; align-items: center; padding: 10px 13px; background: var(--color-surface-alt, #f0f4f8); border-radius: 16px; border-bottom-left-radius: 4px; align-self: flex-start; }
+.chat-typing span { width: 6px; height: 6px; background: var(--color-primary, #1a3a5c); border-radius: 50%; animation: dot-bounce .9s infinite; opacity: 0.6; }
+.chat-typing span:nth-child(2){animation-delay:.15s} .chat-typing span:nth-child(3){animation-delay:.3s}
+@keyframes dot-bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+
+.chat-quick-replies { padding: 0 12px 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.qr-btn { background: none; border: 1.5px solid var(--color-primary, #1a3a5c); color: var(--color-primary, #1a3a5c); border-radius: 20px; padding: 5px 11px; font-size: 0.78rem; cursor: pointer; transition: background .15s, color .15s; white-space: nowrap; }
+.qr-btn:hover { background: var(--color-primary, #1a3a5c); color: #fff; }
+
+.chat-input-row { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--color-border, #e2e8f0); }
+#chat-input { flex: 1; border: 1.5px solid var(--color-border, #e2e8f0); border-radius: 20px; padding: 8px 14px; font-size: 0.875rem; outline: none; background: var(--color-surface, #fff); color: var(--color-text, #1a202c); }
+#chat-input:focus { border-color: var(--color-primary, #1a3a5c); }
+.chat-input-row button[type="submit"] { width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary, #1a3a5c); color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.chat-input-row button[type="submit"]:hover { background: var(--color-primary-dark, #142d4a); }
+
+.chat-disclaimer { font-size: 0.72rem; color: var(--color-text-muted, #718096); padding: 0 14px 10px; margin: 0; text-align: center; }
+.chat-disclaimer a { color: var(--color-primary, #1a3a5c); }
+
+@media(max-width:400px){ #chat-window{width:calc(100vw - 32px); right: 0;} }
+</style>
+
+<script>
+(function(){
+  const ANSWERS_ES = {
+    greencard: `La Green Card (Residencia Permanente) se puede obtener por petición familiar, empleo u otras categorías. El proceso varía según su situación. ¡Contáctenos para una evaluación gratuita!`,
+    asilo: `Para solicitar asilo, en general necesita: formulario I-589, documentación de persecución, pruebas de identidad y evidencia de su país. Es un proceso complejo — la abogada Valle le puede guiar paso a paso.`,
+    daca: `Para renovar DACA debe presentar el formulario I-821D, I-765 y el pago de tarifas antes de que expire su DACA actual. Le recomendamos iniciar el proceso con 6 meses de anticipación.`,
+    deportacion: `Si recibió una orden de remoción, debe actuar de inmediato. Tiene derecho a un abogado — llámenos ahora al (407) 890-1018. Podemos evaluar opciones de apelación o moción de reapertura.`,
+    default: `Gracias por su mensaje. Un miembro del equipo de Valle & Panzardi se comunicará con usted pronto. Para asistencia inmediata, llame al <strong>(407) 890-1018</strong> o <a href="./contact.html">solicite su consulta gratis</a>.`
+  };
+  const ANSWERS_EN = {
+    greencard: `A Green Card (Permanent Residency) can be obtained through family petitions, employment, or other categories. The process varies by situation. Contact us for a free evaluation!`,
+    asilo: `To apply for asylum you generally need: Form I-589, evidence of persecution, identity documents, and country conditions evidence. It's a complex process — Attorney Valle can guide you step by step.`,
+    daca: `To renew DACA, submit Forms I-821D, I-765, and required fees before your current DACA expires. We recommend starting at least 6 months before expiration.`,
+    deportacion: `If you received a removal order, you must act immediately. You have the right to an attorney — call us now at (407) 890-1018. We can evaluate appeal options or motions to reopen.`,
+    default: `Thank you for your message. A Valle & Panzardi team member will reach out shortly. For immediate help, call <strong>(407) 890-1018</strong> or <a href="./contact.html">request your free consultation</a>.`
+  };
+
+  function getLang() { return document.body.classList.contains('lang-en') ? 'en' : 'es'; }
+
+  const trigger = document.getElementById('chat-trigger');
+  const win = document.getElementById('chat-window');
+  const badge = document.getElementById('chat-badge');
+  const iconOpen = document.getElementById('chat-icon-open');
+  const iconClose = document.getElementById('chat-icon-close');
+  const msgs = document.getElementById('chat-messages');
+  const form = document.getElementById('chat-form');
+  const input = document.getElementById('chat-input');
+
+  let isOpen = false;
+
+  function openChat() {
+    isOpen = true;
+    win.removeAttribute('hidden');
+    trigger.setAttribute('aria-expanded', 'true');
+    iconOpen.style.display = 'none';
+    iconClose.style.display = '';
+    badge.classList.add('hidden');
+    if (!msgs.children.length) greet();
+    input.focus();
+  }
+  function closeChat() {
+    isOpen = false;
+    win.setAttribute('hidden', '');
+    trigger.setAttribute('aria-expanded', 'false');
+    iconOpen.style.display = '';
+    iconClose.style.display = 'none';
+  }
+
+  trigger.addEventListener('click', () => isOpen ? closeChat() : openChat());
+  document.getElementById('chat-close-btn').addEventListener('click', closeChat);
+
+  function greet() {
+    const lang = getLang();
+    addMsg(lang === 'en'
+      ? '👋 Hi! I\'m the virtual assistant for Valle & Panzardi. How can I help you today?'
+      : '👋 ¡Hola! Soy el asistente virtual de Valle & Panzardi. ¿En qué le puedo ayudar hoy?', 'bot');
+  }
+
+  function addMsg(text, type) {
+    const el = document.createElement('div');
+    el.className = `chat-msg ${type}`;
+    el.innerHTML = text;
+    msgs.appendChild(el);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function showTyping() {
+    const el = document.createElement('div');
+    el.className = 'chat-typing'; el.id = 'typing-indicator';
+    el.innerHTML = '<span></span><span></span><span></span>';
+    msgs.appendChild(el);
+    msgs.scrollTop = msgs.scrollHeight;
+    return el;
+  }
+
+  function getResponse(text) {
+    const lang = getLang();
+    const answers = lang === 'en' ? ANSWERS_EN : ANSWERS_ES;
+    const t = text.toLowerCase();
+    if (t.match(/green.?card|residenc|residencia/)) return answers.greencard;
+    if (t.match(/asilo|asylum|refugi/)) return answers.asilo;
+    if (t.match(/daca|deferred/)) return answers.daca;
+    if (t.match(/deporta|remov|remoción/)) return answers.deportacion;
+    return answers.default;
+  }
+
+  function sendMsg(text) {
+    if (!text.trim()) return;
+    addMsg(text, 'user');
+    input.value = '';
+    document.getElementById('chat-quick-replies').style.display = 'none';
+    const typing = showTyping();
+    setTimeout(() => {
+      typing.remove();
+      addMsg(getResponse(text), 'bot');
+    }, 900 + Math.random() * 400);
+  }
+
+  form.addEventListener('submit', e => { e.preventDefault(); sendMsg(input.value); });
+
+  document.querySelectorAll('.qr-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lang = getLang();
+      sendMsg(lang === 'en' ? btn.dataset.msgEn : btn.dataset.msgEs);
+    });
+  });
+
+  // Auto-open after 8s if not dismissed
+  setTimeout(() => { if (!isOpen) openChat(); }, 8000);
+})();
+</script>
+
 </body>
 </html>
